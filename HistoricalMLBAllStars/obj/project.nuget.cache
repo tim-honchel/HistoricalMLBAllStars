@@ -1,8 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "DV9k6GY+EB09kex9hbLdHA21/c2RJu5iPXX0CQv0qP96p9OxVbXpA2lBHh3UwwGYbu6HRWQw1eV+rnA3yxAFSg==",
+  "dgSpecHash": "BjuwS80XDc4ZvV7BhriLdcebNqlfisTX8twNOA78i/mJ+jO0+FmqrHFkpSMviJF7LOT1rKCu4ZZ6jVs75SvoDQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\timho\\Documents\\repos\\HistoricalMLBAllStars\\HistoricalMLBAllStars\\HistoricalMLBAllStars.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\timho\\.nuget\\packages\\htmlagilitypack\\1.11.42\\htmlagilitypack.1.11.42.nupkg.sha512"
+  ],
   "logs": []
 }

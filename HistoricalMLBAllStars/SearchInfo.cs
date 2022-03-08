@@ -1,4 +1,7 @@
-﻿namespace HistoricalMLBAllStars
+﻿using System.Collections.Generic;
+using HistoricalMLBAllStars.Models;
+
+namespace HistoricalMLBAllStars
 {
     public static class SearchInfo
     {

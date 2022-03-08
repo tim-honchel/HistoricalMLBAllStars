@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
+using HtmlAgilityPack;
 
 namespace HistoricalMLBAllStars.Controllers
 {
@@ -48,10 +49,12 @@ namespace HistoricalMLBAllStars.Controllers
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             var htmlDictionary = RequestPages(newSearch); // asynchronously get HTML from 11 FanGraphs pages 
-            List<IPlayer> players = PrepPlayers(htmlDictionary);
+            List<Player> players = PrepPlayers(htmlDictionary);
+            CheckDuplicates(players);
+            ChooseRoster(players);
             stopwatch.Stop();
             SearchInfo.Time = stopwatch.Elapsed.Seconds;
-            return View(players);
+            return View(players.OrderBy(x => x.PosNum).ToList());
         }
             [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
@@ -131,6 +134,7 @@ namespace HistoricalMLBAllStars.Controllers
             Task taskCF = Task.Run(() => { htmlCF = GetHTML(urlCF).Result; });
             Task taskRF = Task.Run(() => { htmlRF = GetHTML(urlRF).Result; });
             Task taskDH = Task.Run(() => { htmlDH = GetHTML(urlDH).Result; });
+            Task.WhenAll(taskSP, taskRP, taskC, task1B, task2B, task3B, taskSS, taskLF, taskCF, taskRF, taskDH).Wait();
 
             var htmlDictionary = new Dictionary<string, string>();
             htmlDictionary["SP"] = htmlSP;
@@ -152,21 +156,21 @@ namespace HistoricalMLBAllStars.Controllers
             var html = client.GetStringAsync(url).Result;
             return html;
         }
-        public List<IPlayer> PrepPlayers(Dictionary<string,string> htmlDictionary)
+        public List<Player> PrepPlayers(Dictionary<string,string> htmlDictionary)
         {
-            List<IPlayer> starters = GeneratePitchers(htmlDictionary["SP"], "SP");
-            List<IPlayer> relievers = GeneratePitchers(htmlDictionary["RP"], "RP");
-            List<IPlayer> catchers = GenerateBatters(htmlDictionary["C"], "C");
-            List<IPlayer> firstBasemen = GenerateBatters(htmlDictionary["1B"], "1B");
-            List<IPlayer> secondBasemen = GenerateBatters(htmlDictionary["2B"], "2B");
-            List<IPlayer> thirdBasemen = GenerateBatters(htmlDictionary["3B"], "3B");
-            List<IPlayer> shortstops = GenerateBatters(htmlDictionary["SS"], "SS");
-            List<IPlayer> leftFielders = GenerateBatters(htmlDictionary["LF"], "LF");
-            List<IPlayer> centerFielders = GenerateBatters(htmlDictionary["CF"], "CF");
-            List<IPlayer> rightFielders = GenerateBatters(htmlDictionary["RF"], "RF");
-            List<IPlayer> designatedHitters = GenerateBatters(htmlDictionary["DH"], "DH");
+            List<Player> starters = GeneratePitchers(htmlDictionary["SP"], "SP", 10);
+            List<Player> relievers = GeneratePitchers(htmlDictionary["RP"], "RP", 7);
+            List<Player> catchers = GenerateBatters(htmlDictionary["C"], "C", 3 + SearchInfo.StatAdjustment);
+            List<Player> firstBasemen = GenerateBatters(htmlDictionary["1B"], "1B", 3 + SearchInfo.StatAdjustment);
+            List<Player> secondBasemen = GenerateBatters(htmlDictionary["2B"], "2B", 3 + SearchInfo.StatAdjustment);
+            List<Player> thirdBasemen = GenerateBatters(htmlDictionary["3B"], "3B", 3 + SearchInfo.StatAdjustment);
+            List<Player> shortstops = GenerateBatters(htmlDictionary["SS"], "SS", 3 + SearchInfo.StatAdjustment);
+            List<Player> leftFielders = GenerateBatters(htmlDictionary["LF"], "LF", 3 + SearchInfo.StatAdjustment);
+            List<Player> centerFielders = GenerateBatters(htmlDictionary["CF"], "CF", 3 + SearchInfo.StatAdjustment);
+            List<Player> rightFielders = GenerateBatters(htmlDictionary["RF"], "RF", 3 + SearchInfo.StatAdjustment);
+            List<Player> designatedHitters = GenerateBatters(htmlDictionary["DH"], "DH", 2);
 
-            List<IPlayer> players = new List<IPlayer>(starters.Count + relievers.Count + catchers.Count + firstBasemen.Count + secondBasemen.Count + thirdBasemen.Count + shortstops.Count + leftFielders.Count + centerFielders.Count + rightFielders.Count + designatedHitters.Count);
+            List<Player> players = new List<Player>(starters.Count + relievers.Count + catchers.Count + firstBasemen.Count + secondBasemen.Count + thirdBasemen.Count + shortstops.Count + leftFielders.Count + centerFielders.Count + rightFielders.Count + designatedHitters.Count);
             players.AddRange(starters);
             players.AddRange(relievers);
             players.AddRange(catchers);
@@ -181,27 +185,342 @@ namespace HistoricalMLBAllStars.Controllers
 
             return players;
         }
-        public List<IPlayer> GeneratePitchers(string html, string position)
+        public List<Player> GeneratePitchers(string html, string position, int numRows)
         {
+            List<Player> pitchers = new List<Player>();
+            Dictionary<string, int> positions = new Dictionary<string, int>()
+            {
+                { "SP", 0 }, { "RP", 1 }
+            };
 
-            List<IPlayer> pitchers = new List<IPlayer>();
-            var pitcher = new Pitcher();
-            pitcher.Name = "Test";
-            pitcher.Position = position;
-            pitcher.Role = "rotation";
-            pitchers.Add(pitcher);
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
+            for (int rowNum = 0; rowNum < numRows; rowNum++)
+            {
+                var relevantHTML = htmlDoc.DocumentNode.SelectSingleNode($"//tr[@id='LeaderBoard1_dg1_ctl00__{rowNum}']");
+                var rawRow = relevantHTML.OuterHtml;
+                var rawRowSplit = rawRow.Split("</td>");
+                var columnNum = 0;
+                var pitcher = new Player();
+                pitcher.Position = position;
+                pitcher.RankPosition = rowNum + 1;
+                foreach (string rawColumn in rawRowSplit)
+                {
+                    if (columnNum == 0 || (columnNum == 2 && SearchInfo.StatAdjustment == 0) || columnNum == 10)
+                    {
+
+                    }
+                    if (columnNum == 1)
+                    {
+                        pitcher.Name = rawColumn.Split(">")[2].Split("<")[0];
+                        pitcher.Link = $"https://fangraphs.com/{rawColumn.Split(">")[1].Split('"')[1]}";
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 3)
+                    {
+                        pitcher.War = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1]),1);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 4)
+                    {
+                        pitcher.Era = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1]),2);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 5)
+                    {
+                        pitcher.Whip = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1]),2);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 6)
+                    {
+                        pitcher.Wins = Convert.ToInt32(rawColumn.Split(">")[1]);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 7)
+                    {
+                        pitcher.Saves = Convert.ToInt32(rawColumn.Split(">")[1]);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 8)
+                    {
+                        pitcher.Strikeouts = Convert.ToInt32(rawColumn.Split(">")[1]);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 9)
+                    {
+                        pitcher.Innings = Convert.ToInt32(Math.Floor(Convert.ToDouble(rawColumn.Split(">")[1])));
+                    }
+                    columnNum++;
+                }
+                pitcher.Position = position;
+                pitcher.PosNum = positions[position];
+
+                if (pitcher.Position == "SP" && pitcher.RankPosition <= 5)
+                {
+                    pitcher.Role = "rotation";
+                }
+                else if (pitcher.Position == "RP" && pitcher.RankPosition <= 3)
+                {
+                    pitcher.Role = "bullpen";
+                }
+                else
+                {
+                    pitcher.Role = "mention pitcher";
+                }
+                pitchers.Add(pitcher);
+            }
+
+
             return pitchers;
         }
-        public List<IPlayer> GenerateBatters(string html, string position)
+        public List<Player> GenerateBatters(string html, string position, int numRows)
         {
+            List<Player> batters = new List<Player>();
 
-            List<IPlayer> batters = new List<IPlayer>();
-            var batter = new Batter();
-            batter.Name = "Test";
-            batter.Position = position;
-            batter.Role = "starter";
-            batters.Add(batter);
+            Dictionary<string, int> positions = new Dictionary<string, int>()
+            {
+                { "C", 2 }, { "1B", 3 }, { "2B", 4 }, { "3B", 5 }, { "SS", 6 }, { "LF", 7 }, { "CF", 8 }, { "RF", 9 }, { "DH", 10 }
+            };
+
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(html);
+            for (int rowNum = 0; rowNum < numRows; rowNum++)
+            {
+                var relevantHTML = htmlDoc.DocumentNode.SelectSingleNode($"//tr[@id='LeaderBoard1_dg1_ctl00__{rowNum}']");
+                var rawRow = relevantHTML.OuterHtml;
+                var rawRowSplit = rawRow.Split("</td>");
+                var columnNum = 0;
+                var batter = new Player();
+                batter.Position = position;
+                batter.RankPosition = rowNum + 1;
+                foreach (string rawColumn in rawRowSplit)
+                {
+                    if (columnNum == 0 || (columnNum == 2 && SearchInfo.StatAdjustment == 0) || columnNum + SearchInfo.StatAdjustment == 13 || columnNum + SearchInfo.StatAdjustment == 15)
+                    {
+
+                    }
+                    if (columnNum == 1)
+                    {
+                        batter.Name = rawColumn.Split(">")[2].Split("<")[0];
+                        batter.Link = $"https://fangraphs.com/{rawColumn.Split(">")[1].Split('"')[1]}";
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 3)
+                    {
+                        batter.War = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1]), 1);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 4)
+                    {
+                        batter.Avg = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1]), 3);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 5)
+                    {
+                        batter.Obp = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1]), 3);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 6)
+                    {
+                        batter.Slg = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1]),3);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 7)
+                    {
+                        batter.Hits = Convert.ToInt32(rawColumn.Split(">")[1]);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 8)
+                    {
+                        batter.Runs = Convert.ToInt32(rawColumn.Split(">")[1]);
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 9)
+                    {
+                        batter.HomeRuns = Convert.ToInt32(Math.Floor(Convert.ToDouble(rawColumn.Split(">")[1])));
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 10)
+                    {
+                        batter.RBI = Convert.ToInt32(Math.Floor(Convert.ToDouble(rawColumn.Split(">")[1])));
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 11)
+                    {
+                        batter.Steals = Convert.ToInt32(Math.Floor(Convert.ToDouble(rawColumn.Split(">")[1])));
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 12)
+                    {
+                        batter.PlateAppearances = Convert.ToInt32(Math.Floor(Convert.ToDouble(rawColumn.Split(">")[1])));
+                    }
+                    if (columnNum + SearchInfo.StatAdjustment == 14)
+                    {
+                        batter.DWar = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1])/10,1);
+                    }
+                    columnNum++;
+                }
+                batter.Position = position;
+                batter.PosNum = positions[position];
+                batter.Role = "mention batter";
+                batters.Add(batter);
+            }
+
+
             return batters;
+        }
+        public void CheckDuplicates (List<Player> players)
+        {
+            foreach (Player player1 in players)
+            {
+                foreach (Player player2 in players)
+                {
+                    if (player1.Name == player2.Name && player1 != player2 && player1.Duplicate != true && player2.Duplicate != true)
+                    {
+                        ChooseDuplicateToRemove(player1, player2, players);
+                    }
+                }
+            }
+            List<Player> playersToRemove = players.FindAll(x => x.Duplicate == true);
+            foreach (Player player in playersToRemove)
+            {
+                    players.Remove(player);
+            }
+        }
+        public void ChooseDuplicateToRemove(Player player1, Player player2, List<Player> players)
+        {
+            if (player2.RankPosition == 1 && player1.RankPosition > 1 && player1.PosNum >= 2 && player2.PosNum != 10)
+            {
+                player2.Position = $"{player2.Position}/{player1.Position}";
+                player1.Duplicate = true;
+            }
+            else if (player2.RankPosition == 1 && player1.RankPosition == 1 && player2.PosNum >= 2 && player2.PosNum != 10)
+            {
+                var nextBestPosition1 = players.Find(x => x.PosNum == player1.PosNum && x.RankPosition == 2).War;
+                var nextBestPosition2 = players.Find(x => x.PosNum == player2.PosNum && x.RankPosition == 2).War;
+                if (nextBestPosition1 > nextBestPosition2)
+                {
+                    player2.Position = $"{player2.Position}/{player1.Position}";
+                    player1.Duplicate = true;
+                }
+                else
+                {
+                    player1.Position = $"{player1.Position}/{player2.Position}";
+                    player2.Duplicate = true;
+                }
+            }
+            else if (player2.PosNum == 2 && player2.RankPosition == 2 && player1.RankPosition != 1)
+            {
+                player2.Position = $"{player2.Position}/{player1.Position}";
+                player1.Duplicate = true;
+            }
+            else if (player1.PosNum == 10)
+            {
+                player2.Position = $"{player2.Position}/{player1.Position}";
+                player1.Duplicate = true;
+            }
+            else if (player1.PosNum == 3 && player2.PosNum != 10)
+            {
+                player2.Position = $"{player2.Position}/{player1.Position}";
+                player1.Duplicate = true;
+            }
+            else if (player2.PosNum == 1 && player1.PosNum == 0 && player1.RankPosition > 5)
+            {
+                player2.Position = $"{player2.Position}/{player1.Position}";
+                player1.Duplicate = true;
+            }
+            else
+            {
+                player1.Position = $"{player1.Position}/{player2.Position}";
+                player2.Duplicate = true;
+            }
+        }
+        public void ChooseRoster(List<Player> players)
+        {
+            Dictionary<int, int> positionCount = new Dictionary<int, int>()
+            {
+                { 2, 0 }, { 3, 0 }, { 4, 0 }, { 5, 0 }, { 6, 0 }, { 7, 0 }, { 8, 0 }, { 9, 0 }, { 10, 0 }
+            };
+            Dictionary<string, int> rosterCount = new Dictionary<string, int>()
+            {
+                {"rotation", players.FindAll(x => x.Role == "rotation").Count() }, {"bullpen", players.FindAll(x => x.Role == "bullpen").Count() }, { "starters", 0 }, { "reserves", 0 }, { "backup C", 0 }, { "backup IF", 0 }, { "backup OF", 0 }, { "DH", 0 }, { "flex reserve", 0 }, {"mention", 0}
+            };
+            var sortedPlayers = players.OrderByDescending(x => x.War);
+
+            foreach (Player player in sortedPlayers)
+            {
+                if (player.Role == "mention batter")
+                {
+                    if (rosterCount["starters"] < 9)
+                    {
+                        if (player.PosNum >= 2 && player.PosNum < 10 && positionCount[player.PosNum] == 0)
+                        {
+                            player.Role = "starter";
+                            positionCount[player.PosNum]++;
+                            rosterCount["starters"]++;
+                        }
+                        else if (player.PosNum == 10 && positionCount[10] == 0)
+                        {
+                            player.Role = "starter";
+                            player.PosNum = 10;
+                            positionCount[10]++;
+                            rosterCount["DH"]++;
+                            rosterCount["starters"]++;
+                        }
+                        else if (player.PosNum >= 2 && positionCount[10] == 0)
+                        {
+                            player.Role = "starter";
+                            player.Position = $"{player.Position} (DH)";
+                            player.PosNum = 10;
+                            positionCount[10]++;
+                            rosterCount["starters"]++;
+                        }
+                    }
+                    if (rosterCount["reserves"] < 4 && player.Role == "mention batter")
+                    {
+                        if (player.PosNum == 2 && rosterCount["backup C"] == 0)
+                        {
+                            player.Role = "reserve";
+                            rosterCount["backup C"]++;
+                            rosterCount["reserves"]++;
+                        }
+                        else if ((player.PosNum == 4 || player.PosNum == 5 || player.PosNum == 6) && rosterCount["backup IF"] == 0)
+                        {
+                            player.Role = "reserve";
+                            rosterCount["backup IF"]++;
+                            rosterCount["reserves"]++;
+                        }
+                        else if ((player.PosNum == 7 || player.PosNum == 8 || player.PosNum == 9) && rosterCount["backup OF"] == 0)
+                        {
+                            player.Role = "reserve";
+                            rosterCount["backup OF"]++;
+                            rosterCount["reserves"]++;
+                        }
+                        else if (player.PosNum >= 2 && player.PosNum < 10 && rosterCount["flex reserve"] == 0)
+                        {
+                            player.Role = "reserve";
+                            rosterCount["flex reserve"]++;
+                            rosterCount["reserves"]++;
+                        }
+                        else if (player.PosNum == 10 && rosterCount["DH"] == 0 && rosterCount["flex reserve"] == 0)
+                        {
+                            player.Role = "reserve";
+                            rosterCount["flex reserve"]++;
+                            rosterCount["DH"]++;
+                            rosterCount["reserves"]++;
+                        }
+                    }
+                    if (player.Role == "mention batter")
+                    {
+                        rosterCount["mention"]++;
+                        if (rosterCount["mention"] > 5)
+                        {
+                            player.Duplicate = true;
+                        }
+                    }
+                }
+                else if (player.Role == "mention pitcher")
+                {
+                    if (player.PosNum == 0 && rosterCount["rotation"] < 5)
+                    {
+                        player.Role = "rotation";
+                        rosterCount["rotation"]++;
+                    }
+                    else if (rosterCount["bullpen"] < 7)
+                    {
+                        player.Role = "bullpen";
+                        rosterCount["bullpen"]++;
+                    }
+                }
+            }
+            List<Player> playersToRemove = players.FindAll(x => x.Duplicate == true);
+            foreach (Player player in playersToRemove)
+            {
+                players.Remove(player);
+            }
         }
     }
 }

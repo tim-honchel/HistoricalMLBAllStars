@@ -1,4 +1,4 @@
-﻿@model List<IPlayer>
+﻿@model List<Player>
 
  <h1>All-Star Team</h1>
     <p>For the time period @SearchInfo.StartYear to @SearchInfo.EndYear here is a roster of the top 12 pitchers and 13 position players @SearchInfo.Display:</p>
@@ -21,14 +21,14 @@
                 {
                     <tr>
                         <td>@pitcher.Position</td>
-                        <td>@pitcher.Name</td>
-                        <td>0.0</td>
-                        <td>0.00</td>
-                        <td>0.00</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
+                        <td><a href="@pitcher.Link">@pitcher.Name</a></td>
+                        <td>@pitcher.War</td>
+                        <td>@pitcher.Era</td>
+                        <td>@pitcher.Whip</td>
+                        <td>@pitcher.Wins</td>
+                        <td>@pitcher.Saves</td>
+                        <td>@pitcher.Strikeouts</td>
+                        <td>@pitcher.Innings</td>
                     </tr>
                 }
                 
@@ -53,14 +53,14 @@
                 {
                     <tr>
                         <td>@pitcher.Position</td>
-                        <td>@pitcher.Name</td>
-                        <td>0.0</td>
-                        <td>0.00</td>
-                        <td>0.00</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
+                        <td><a href="@pitcher.Link">@pitcher.Name</a></td>
+                        <td>@pitcher.War</td>
+                        <td>@pitcher.Era</td>
+                        <td>@pitcher.Whip</td>
+                        <td>@pitcher.Wins</td>
+                        <td>@pitcher.Saves</td>
+                        <td>@pitcher.Strikeouts</td>
+                        <td>@pitcher.Innings</td>
                     </tr>
                 }
                 
@@ -78,6 +78,7 @@
                 <th>R</th>
                 <th>H</th>
                 <th>HR</th>
+                <th>RBI</th>
                 <th>SB</th>
                 <th>defWAR</th>
                 <th>PA</th>
@@ -88,17 +89,18 @@
                 {
                     <tr>
                         <td>@batter.Position</td>
-                        <td>@batter.Name</td>
-                        <td>0.0</td>
-                        <td>.000</td>
-                        <td>.000</td>
-                        <td>.000</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0.0</td>
-                        <td>0</td>
+                        <td><a href="@batter.Link">@batter.Name</a></td>
+                        <td>@batter.War</td>
+                        <td>@batter.Avg</td>
+                        <td>@batter.Obp</td>
+                        <td>@batter.Slg</td>
+                        <td>@batter.Runs</td>
+                        <td>@batter.Hits</td>
+                        <td>@batter.HomeRuns</td>
+                        <td>@batter.RBI</td>
+                        <td>@batter.Steals</td>
+                        <td>@batter.DWar</td>
+                        <td>@batter.PlateAppearances</td>
                     </tr>
                 }
                 
@@ -116,6 +118,7 @@
                 <th>R</th>
                 <th>H</th>
                 <th>HR</th>
+                <th>RBI</th>
                 <th>SB</th>
                 <th>defWAR</th>
                 <th>PA</th>
@@ -126,38 +129,91 @@
                 {
                     <tr>
                         <td>@batter.Position</td>
-                        <td>@batter.Name</td>
-                        <td>0.0</td>
-                        <td>.000</td>
-                        <td>.000</td>
-                        <td>.000</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0</td>
-                        <td>0.0</td>
-                        <td>0</td>
+                        <td><a href="@batter.Link">@batter.Name</a></td>
+                        <td>@batter.War</td>
+                        <td>@batter.Avg</td>
+                        <td>@batter.Obp</td>
+                        <td>@batter.Slg</td>
+                        <td>@batter.Runs</td>
+                        <td>@batter.Hits</td>
+                        <td>@batter.HomeRuns</td>
+                        <td>@batter.RBI</td>
+                        <td>@batter.Steals</td>
+                        <td>@batter.DWar</td>
+                        <td>@batter.PlateAppearances</td>
                     </tr>
                 }
                 
             }
         </table>
-    <h3><u>Honorable Mentions:</u></h3>
-    <table class="table">
+        <h3><u>Honorable Mention - Pitchers:</u></h3>
+        <table class="table">
             <tr>
                 <th>Pos</th>
                 <th>Name</th>
                 <th>WAR</th>
+                <th>ERA</th>
+                <th>WHIP</th>
+                <th>W</th>
+                <th>SV</th>
+                <th>K</th>
+                <th>IP</th>
             </tr>
-            @foreach (var player in Model)
+            @foreach (var pitcher in Model)
             {
-                @if (player.Role == "mention")
+                @if (pitcher.Role == "mention pitcher")
                 {
-                   <tr>
-                    <td>@player.Position</td>
-                    <td>@player.Name</td>
-                    <td>0.0</td>
-                </tr>
+                    <tr>
+                        <td>@pitcher.Position</td>
+                        <td><a href="@pitcher.Link">@pitcher.Name</a></td>
+                        <td>@pitcher.War</td>
+                        <td>@pitcher.Era</td>
+                        <td>@pitcher.Whip</td>
+                        <td>@pitcher.Wins</td>
+                        <td>@pitcher.Saves</td>
+                        <td>@pitcher.Strikeouts</td>
+                        <td>@pitcher.Innings</td>
+                    </tr>
+                }
+                
+            }
+        </table>
+    <h3><u>Honorable Mention - Position Players:</u></h3>
+            <table class="table">
+            <tr>
+                <th>Pos</th>
+                <th>Name</th>
+                <th>WAR</th>
+                <th>AVG</th>
+                <th>OBP</th>
+                <th>SLG</th>
+                <th>R</th>
+                <th>H</th>
+                <th>HR</th>
+                <th>RBI</th>
+                <th>SB</th>
+                <th>defWAR</th>
+                <th>PA</th>
+            </tr>
+            @foreach (var batter in Model)
+            {
+                @if (batter.Role == "mention batter")
+                {
+                    <tr>
+                        <td>@batter.Position</td>
+                        <td><a href="@batter.Link">@batter.Name</a></td>
+                        <td>@batter.War</td>
+                        <td>@batter.Avg</td>
+                        <td>@batter.Obp</td>
+                        <td>@batter.Slg</td>
+                        <td>@batter.Runs</td>
+                        <td>@batter.Hits</td>
+                        <td>@batter.HomeRuns</td>
+                        <td>@batter.RBI</td>
+                        <td>@batter.Steals</td>
+                        <td>@batter.DWar</td>
+                        <td>@batter.PlateAppearances</td>
+                    </tr>
                 }
                 
             }

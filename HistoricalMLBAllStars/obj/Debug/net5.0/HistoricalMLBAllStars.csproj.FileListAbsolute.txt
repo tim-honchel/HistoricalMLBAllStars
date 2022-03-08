@@ -39,3 +39,4 @@ C:\Users\timho\Documents\repos\HistoricalMLBAllStars\HistoricalMLBAllStars\obj\D
 C:\Users\timho\Documents\repos\HistoricalMLBAllStars\HistoricalMLBAllStars\obj\Debug\net5.0\HistoricalMLBAllStars.genruntimeconfig.cache
 C:\Users\timho\Documents\repos\HistoricalMLBAllStars\HistoricalMLBAllStars\obj\Debug\net5.0\HistoricalMLBAllStars.csproj.CopyComplete
 C:\Users\timho\Documents\repos\HistoricalMLBAllStars\HistoricalMLBAllStars\obj\Debug\net5.0\Razor\Views\Home\Roster.cshtml.g.cs
+C:\Users\timho\Documents\repos\HistoricalMLBAllStars\HistoricalMLBAllStars\bin\Debug\net5.0\HtmlAgilityPack.dll
