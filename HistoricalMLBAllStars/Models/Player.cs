@@ -13,6 +13,8 @@
         public int Saves { get; set; }
         public int Strikeouts { get; set; }
         public int Innings { get; set; }
+        public double Games { get; set; }
+        public double GamesStarted { get; set; }
         public double Avg { get; set; } // batting average
         public double Obp { get; set; } // on base percentage
         public double Slg { get; set; } // slugging percentage
