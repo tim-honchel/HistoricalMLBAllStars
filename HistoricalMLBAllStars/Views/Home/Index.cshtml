@@ -1,0 +1,43 @@
+﻿@model Search 
+
+    <h1>Generate an MLB All Star Team for a Specific Time Period</h1>
+
+    @using (Html.BeginForm("Loading", "Home", "Post"))
+    {
+        <br>
+        <label asp-for="StartYear" class="control-label">Enter the starting year of the time period</label>
+        <select id="startYear" class="form-control" name="StartYear" value="" onchange="ValidateYears()">
+            @foreach (int year in Model.YearDropdown)
+            {
+                <option value="@year">@year</option>
+            }
+        </select>
+        <br>
+        <label asp-for="EndYear" class="control-label">Enter the ending year of the time period</label>
+        <select id="endYear" class="form-control" name="EndYear" value="" onchange="ValidateYears()">
+            @foreach (int year in Model.YearDropdown)
+            {
+                @if (year == 2021)
+                {
+                <option value="@year" selected>@year</option>
+                }
+                @if (year != 2021)
+                {
+                <option value="@year">@year</option>
+                }
+            }
+        </select>
+        <br>
+        <label asp-for="LeagueOrTeam" class="control-label">Choose the league or team</label>
+        <select class="form-control" name="LeagueOrTeam" value="">
+            @foreach (string team in Model.TeamDropdown)
+            {
+                <option value="@team">@team</option>
+            }
+        </select>
+        <br>
+        <input id="submitYears" type="submit" value="Search This Time Period" class="btn btn-primary" />
+        <br>
+    }
+    <br>
+    <p>Created by <a href ="http://tim-honchel.github.io" target="_blank">Tim Honchel</a>. 2022. All statistics from FanGraphs.</p>

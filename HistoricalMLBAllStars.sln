@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32002.185
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HistoricalMLBAllStars", "HistoricalMLBAllStars\HistoricalMLBAllStars.csproj", "{27817ED6-BD06-45CF-82C4-35BCB4AC0553}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{27817ED6-BD06-45CF-82C4-35BCB4AC0553}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27817ED6-BD06-45CF-82C4-35BCB4AC0553}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27817ED6-BD06-45CF-82C4-35BCB4AC0553}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27817ED6-BD06-45CF-82C4-35BCB4AC0553}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {38136E16-0877-4BB2-A9C2-801EC1091BA7}
+	EndGlobalSection
+EndGlobal
