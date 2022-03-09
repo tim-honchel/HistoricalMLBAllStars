@@ -362,7 +362,7 @@ namespace HistoricalMLBAllStars.Controllers
                         }
                         if (columnNum + SearchInfo.StatAdjustment == 14)
                         {
-                            batter.DWar = Math.Round(Convert.ToDouble(rawColumn.Split(">")[1]) / 10, 1);
+                            batter.DWar = Convert.ToInt32(Convert.ToDouble(rawColumn.Split(">")[1]) / 10);
                         }
                         columnNum++;
                     }
@@ -476,7 +476,10 @@ namespace HistoricalMLBAllStars.Controllers
                         else if (player.PosNum >= 2 && positionCount[10] == 0)
                         {
                             player.Role = "starter";
-                            player.Position = $"{player.Position} (DH)";
+                            if (player.Position.Contains("DH") == false)
+                            {
+                                player.Position = $"{player.Position}(DH)";
+                            }
                             player.PosNum = 10;
                             positionCount[10]++;
                             rosterCount["starters"]++;

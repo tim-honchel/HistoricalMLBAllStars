@@ -1,43 +1,77 @@
 ﻿@model Search 
 
+<div class="main-page">
     <h1>Generate an MLB All Star Team for a Specific Time Period</h1>
+    <div class="column-1">
+        @using (Html.BeginForm("Loading", "Home", "Post"))
+        {
+            <br>
+            <label asp-for="StartYear" class="control-label">Enter the starting year of the time period</label>
+            <select id="startYear" class="form-control" name="StartYear" value="" onchange="ValidateYears()">
+                @foreach (int year in Model.YearDropdown)
+                {
+                    <option value="@year">@year</option>
+                }
+            </select>
+            <br>
+            <label asp-for="EndYear" class="control-label">Enter the ending year of the time period</label>
+            <select id="endYear" class="form-control" name="EndYear" value="" onchange="ValidateYears()">
+                @foreach (int year in Model.YearDropdown)
+                {
+                    @if (year == 2021)
+                    {
+                    <option value="@year" selected>@year</option>
+                    }
+                    @if (year != 2021)
+                    {
+                    <option value="@year">@year</option>
+                    }
+                }
+            </select>
+            <br>
+            <label asp-for="LeagueOrTeam" class="control-label">Choose the league or team</label>
+            <select class="form-control" name="LeagueOrTeam" value="">
+                @foreach (string team in Model.TeamDropdown)
+                {
+                    <option value="@team">@team</option>
+                }
+            </select>
+            <br>
+            <input id="submitYears" type="submit" value="Search This Time Period" class="btn btn-primary" />
+            <br>
+        }
+    </div>
+    <div class="column-2">
+    
+        <div class="carousel">
+          <div class="item main">
+            <img src="~/Hank_Aaron.jpg" alt="Hank Aaron" />
+            <div class="caption"><a href="https://www.flickr.com/photos/147039490@N04/50863460746">Hank Aaron by Bluesy Daye, CC, cropped</a></div>
+          </div>
+          <div class="item">
+            <img src="~/Mariano_Rivera.jpg" alt="Mariano Rivera" />
+            <div class="caption"><a href="https://en.wikipedia.org/wiki/Mariano_Rivera#/media/File:Mariano_Rivera_allison_7_29_07.jpg">Mariano Rivera by Keith Allison, CC, cropped</a></div>
+          </div>
+          <div class="item">
+            <img src="~/Babe_Ruth.jpg" alt="Babe Ruth" />
+            <div class="caption"><a href="https://www.flickr.com/photos/rchdj10/9524972903">Babe Ruth by Richard Bartlaga, CC, cropped</a></div>
+          </div>  
+          <div class="item">
+            <img src="~/Randy_Johnson.jpg" alt="Randy Johnson" />
+            <div class="caption"><a href="https://www.flickr.com/photos/dirkhansen/2814984538/in/photostream/">Randy Johnson by Dirk Hansen, CC, cropped</a></div>
+          </div>
+          <div class="item">
+            <img src="~/Willie_Mays.jpg" alt="Willie Mays" />
+            <div class="caption"><a href="https://www.flickr.com/photos/53035820@N02/7920140264/">Willie Mays by Kristine, CC, cropped</a></div>
+          </div>
+          <div class="item">
+            <img src="~/Nolan_Ryan.jpg" alt="Nolan Ryan" />
+            <div class="caption"><a href="https://www.flickr.com/photos/8563910@N08/5119762710/">Nolan Ryan by Chuck Andersen, CC, cropped</a></div>
+          </div>          
+        </div>
 
-    @using (Html.BeginForm("Loading", "Home", "Post"))
-    {
-        <br>
-        <label asp-for="StartYear" class="control-label">Enter the starting year of the time period</label>
-        <select id="startYear" class="form-control" name="StartYear" value="" onchange="ValidateYears()">
-            @foreach (int year in Model.YearDropdown)
-            {
-                <option value="@year">@year</option>
-            }
-        </select>
-        <br>
-        <label asp-for="EndYear" class="control-label">Enter the ending year of the time period</label>
-        <select id="endYear" class="form-control" name="EndYear" value="" onchange="ValidateYears()">
-            @foreach (int year in Model.YearDropdown)
-            {
-                @if (year == 2021)
-                {
-                <option value="@year" selected>@year</option>
-                }
-                @if (year != 2021)
-                {
-                <option value="@year">@year</option>
-                }
-            }
-        </select>
-        <br>
-        <label asp-for="LeagueOrTeam" class="control-label">Choose the league or team</label>
-        <select class="form-control" name="LeagueOrTeam" value="">
-            @foreach (string team in Model.TeamDropdown)
-            {
-                <option value="@team">@team</option>
-            }
-        </select>
-        <br>
-        <input id="submitYears" type="submit" value="Search This Time Period" class="btn btn-primary" />
-        <br>
-    }
-    <br>
-    <p>Created by <a href ="http://tim-honchel.github.io" target="_blank">Tim Honchel</a>. 2022. All statistics from FanGraphs.</p>
+    </div>
+
+</div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>

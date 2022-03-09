@@ -24,7 +24,7 @@
         public int RBI { get; set; }
         public int Steals { get; set; }
         public int PlateAppearances { get; set; }
-        public double DWar { get; set; } // contribution to WAR from defense
+        public int DWar { get; set; } // contribution to WAR from defense
         public int RankPosition { get; set; }
         public string SearchID { get; set; }
         public string Role { get; set; } // rotation, bullpen, honorable mentions

@@ -1,8 +1,8 @@
 ﻿@model List<Player>
 
  <h1>All-Star Team</h1>
-    <p>For the time period @SearchInfo.StartYear to @SearchInfo.EndYear here is a roster of the top 12 pitchers and 13 position players @SearchInfo.Display:</p>
-    <h3><u>Rotation:</u></h3>
+    <p>For the time period @SearchInfo.StartYear to @SearchInfo.EndYear here is a roster of the top 12 pitchers and 13 position players @SearchInfo.Display: (see bottom for abbreviation meanings)</p>
+    <h3>Rotation:</h3>
         <table class="table">
             <tr>
                 <th>Pos</th>
@@ -20,11 +20,11 @@
                 @if (pitcher.Role == "rotation")
                 {
                     <tr>
-                        <td>@pitcher.Position</td>
-                        <td><a href="@pitcher.Link">@pitcher.Name</a></td>
-                        <td>@pitcher.War</td>
-                        <td>@pitcher.Era</td>
-                        <td>@pitcher.Whip</td>
+                        <td id="position">@pitcher.Position</td>
+                        <td id="player"><a href="@pitcher.Link">@pitcher.Name</a></td>
+                        <td>@pitcher.War.ToString("0.0")</td>
+                        <td>@pitcher.Era.ToString("0.00")</td>
+                        <td>@pitcher.Whip.ToString("0.00")</td>
                         <td>@pitcher.Wins</td>
                         <td>@pitcher.Saves</td>
                         <td>@pitcher.Strikeouts</td>
@@ -34,7 +34,7 @@
                 
             }
         </table>
-        <h3><u>Bullpen:</u></h3>
+        <h3>Bullpen:</h3>
         <table class="table">
             <tr>
                 <th>Pos</th>
@@ -52,11 +52,11 @@
                 @if (pitcher.Role == "bullpen")
                 {
                     <tr>
-                        <td>@pitcher.Position</td>
-                        <td><a href="@pitcher.Link">@pitcher.Name</a></td>
-                        <td>@pitcher.War</td>
-                        <td>@pitcher.Era</td>
-                        <td>@pitcher.Whip</td>
+                        <td id="position">@pitcher.Position</td>
+                        <td id="player"><a href="@pitcher.Link">@pitcher.Name</a></td>
+                        <td>@pitcher.War.ToString("0.0")</td>
+                        <td>@pitcher.Era.ToString("0.00")</td>
+                        <td>@pitcher.Whip.ToString("0.00")</td>
                         <td>@pitcher.Wins</td>
                         <td>@pitcher.Saves</td>
                         <td>@pitcher.Strikeouts</td>
@@ -66,7 +66,7 @@
                 
             }
         </table>
-    <h3><u>Starters:</u></h3>
+    <h3>Starters:</h3>
             <table class="table">
             <tr>
                 <th>Pos</th>
@@ -80,7 +80,7 @@
                 <th>HR</th>
                 <th>RBI</th>
                 <th>SB</th>
-                <th>defWAR</th>
+                <th>dWAR</th>
                 <th>PA</th>
             </tr>
             @foreach (var batter in Model)
@@ -88,12 +88,12 @@
                 @if (batter.Role == "starter")
                 {
                     <tr>
-                        <td>@batter.Position</td>
-                        <td><a href="@batter.Link">@batter.Name</a></td>
-                        <td>@batter.War</td>
-                        <td>@batter.Avg</td>
-                        <td>@batter.Obp</td>
-                        <td>@batter.Slg</td>
+                        <td id="position">@batter.Position</td>
+                        <td id="player"><a href="@batter.Link">@batter.Name</a></td>
+                        <td>@batter.War.ToString("0.0")</td>
+                        <td>@batter.Avg.ToString(".000")</td>
+                        <td>@batter.Obp.ToString(".000")</td>
+                        <td>@batter.Slg.ToString(".000")</td>
                         <td>@batter.Runs</td>
                         <td>@batter.Hits</td>
                         <td>@batter.HomeRuns</td>
@@ -106,7 +106,7 @@
                 
             }
         </table>
-        <h3><u>Reserves:</u></h3>
+        <h3>Reserves:</h3>
             <table class="table">
             <tr>
                 <th>Pos</th>
@@ -120,7 +120,7 @@
                 <th>HR</th>
                 <th>RBI</th>
                 <th>SB</th>
-                <th>defWAR</th>
+                <th>dWAR</th>
                 <th>PA</th>
             </tr>
             @foreach (var batter in Model)
@@ -128,12 +128,12 @@
                 @if (batter.Role == "reserve")
                 {
                     <tr>
-                        <td>@batter.Position</td>
-                        <td><a href="@batter.Link">@batter.Name</a></td>
-                        <td>@batter.War</td>
-                        <td>@batter.Avg</td>
-                        <td>@batter.Obp</td>
-                        <td>@batter.Slg</td>
+                        <td id="position">@batter.Position</td>
+                        <td id="player"><a href="@batter.Link">@batter.Name</a></td>
+                        <td>@batter.War.ToString("0.0")</td>
+                        <td>@batter.Avg.ToString(".000")</td>
+                        <td>@batter.Obp.ToString(".000")</td>
+                        <td>@batter.Slg.ToString(".000")</td>
                         <td>@batter.Runs</td>
                         <td>@batter.Hits</td>
                         <td>@batter.HomeRuns</td>
@@ -146,7 +146,7 @@
                 
             }
         </table>
-        <h3><u>Honorable Mention - Pitchers:</u></h3>
+        <h3>Honorable Mention - Pitchers:</h3>
         <table class="table">
             <tr>
                 <th>Pos</th>
@@ -164,11 +164,11 @@
                 @if (pitcher.Role == "mention pitcher")
                 {
                     <tr>
-                        <td>@pitcher.Position</td>
-                        <td><a href="@pitcher.Link">@pitcher.Name</a></td>
-                        <td>@pitcher.War</td>
-                        <td>@pitcher.Era</td>
-                        <td>@pitcher.Whip</td>
+                        <td id="position">@pitcher.Position</td>
+                        <td id="player"><a href="@pitcher.Link">@pitcher.Name</a></td>
+                        <td>@pitcher.War.ToString("0.0")</td>
+                        <td>@pitcher.Era.ToString("0.00")</td>
+                        <td>@pitcher.Whip.ToString("0.00")</td>
                         <td>@pitcher.Wins</td>
                         <td>@pitcher.Saves</td>
                         <td>@pitcher.Strikeouts</td>
@@ -178,7 +178,7 @@
                 
             }
         </table>
-    <h3><u>Honorable Mention - Position Players:</u></h3>
+    <h3>Honorable Mention - Position Players:</h3>
             <table class="table">
             <tr>
                 <th>Pos</th>
@@ -192,7 +192,7 @@
                 <th>HR</th>
                 <th>RBI</th>
                 <th>SB</th>
-                <th>defWAR</th>
+                <th>dWAR</th>
                 <th>PA</th>
             </tr>
             @foreach (var batter in Model)
@@ -200,12 +200,12 @@
                 @if (batter.Role == "mention batter")
                 {
                     <tr>
-                        <td>@batter.Position</td>
-                        <td><a href="@batter.Link">@batter.Name</a></td>
-                        <td>@batter.War</td>
-                        <td>@batter.Avg</td>
-                        <td>@batter.Obp</td>
-                        <td>@batter.Slg</td>
+                        <td id="position">@batter.Position</td>
+                        <td id="player"><a href="@batter.Link">@batter.Name</a></td>
+                        <td>@batter.War.ToString("0.0")</td>
+                        <td>@batter.Avg.ToString(".000")</td>
+                        <td>@batter.Obp.ToString(".000")</td>
+                        <td>@batter.Slg.ToString(".000")</td>
                         <td>@batter.Runs</td>
                         <td>@batter.Hits</td>
                         <td>@batter.HomeRuns</td>
@@ -219,9 +219,9 @@
             }
         </table>
     <br>
+    <p>Pos = Position, WAR = Wins Above Replacement, ERA = Earned Run Average, WHIP = Walks + Hits Per Inning Pitched, W = Wins, SV = Saves, K = Strikeouts, IP = Innings Pitched, AVG = Batting Average, OBP = On Base Percentage, SLG = Slugging Percentage, R = Runs, H = Hits, HR = Home Runs, RBI = Runs Batted In, SB = Stolen Bases, dWAR = Defensive Wins Above Replacement, PA = Plate Appearances</p>
     <br>
     <a asp-area="" asp-controller="Home" asp-action="Index">Start a New Search</a>
     <br>
     <p>Search took @SearchInfo.Time seconds</p>
     <br>
-    <p>Created by <a href ="http://tim-honchel.github.io" target="_blank">Tim Honchel</a>. 2022. All statistics from FanGraphs.</p>
