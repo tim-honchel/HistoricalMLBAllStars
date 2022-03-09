@@ -480,6 +480,10 @@ namespace HistoricalMLBAllStars.Controllers
                             {
                                 player.Position = $"{player.Position}(DH)";
                             }
+                            else if (player.Position.Contains("/DH") == true)
+                            {
+                                player.Position = $"DH/{player.Position.Substring(0,player.Position.Length-3)}";
+                            }
                             player.PosNum = 10;
                             positionCount[10]++;
                             rosterCount["starters"]++;

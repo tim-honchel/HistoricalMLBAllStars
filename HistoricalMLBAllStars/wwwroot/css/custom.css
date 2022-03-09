@@ -71,6 +71,10 @@
     color: rgb(255, 255, 255);
 }
 
+.table {
+    width:fit-content;
+}
+
 .table tr {
     line-height:0pt;
 }
