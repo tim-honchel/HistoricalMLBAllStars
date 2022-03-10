@@ -3,13 +3,13 @@
 <div class="main-page">
     <h1>Generate an All Star Team for a Specific Time Period</h1>
     <div class="column-1">
-        @using (Html.BeginForm("Loading", "Home", "Post"))
+        @using (Html.BeginForm("Preloading", "Home", "Post")) // activates "preloading" action when submit button is pressed
         {
             <br>
             <input class="form-control" type="hidden" name="ID" value="not set" />
             <label asp-for="StartYear" class="control-label">Enter the starting year of the time period</label>
             <select id="startYear" class="form-control" name="StartYear" value="" onchange="ValidateYears()">
-                @foreach (int year in SearchInfo.YearDropdown)
+                @foreach (int year in SearchInfo.YearDropdown) // creates dropdown list
                 {
                     <option value="@year">@year</option>
                 }
@@ -17,11 +17,11 @@
             <br>
             <label asp-for="EndYear" class="control-label">Enter the ending year of the time period</label>
             <select id="endYear" class="form-control" name="EndYear" value="" onchange="ValidateYears()">
-                @foreach (int year in SearchInfo.YearDropdown)
+                @foreach (int year in SearchInfo.YearDropdown) // creates dropdown list
                 {
                     @if (year == 2021)
                     {
-                    <option value="@year" selected>@year</option>
+                    <option value="@year" selected>@year</option> // sets 2021 as default value
                     }
                     @if (year != 2021)
                     {
@@ -32,7 +32,7 @@
             <br>
             <label asp-for="LeagueOrTeam" class="control-label">Choose the league or team</label>
             <select class="form-control" name="LeagueOrTeam" value="">
-                @foreach (string team in SearchInfo.TeamDropdown)
+                @foreach (string team in SearchInfo.TeamDropdown) // creates dropdown list
                 {
                     <option value="@team">@team</option>
                 }
@@ -44,7 +44,7 @@
     </div>
     <div class="column-2">
     
-        <div class="carousel">
+        <div class="carousel"> @*image slider*@
           <div class="item main">
             <img src="~/Hank_Aaron.jpg" alt="Hank Aaron" />
             <div class="caption"><a href="https://www.flickr.com/photos/147039490@N04/50863460746">Hank Aaron by Bluesy Daye, CC, cropped</a></div>

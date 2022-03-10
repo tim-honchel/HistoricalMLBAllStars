@@ -1,0 +1,19 @@
+﻿@model Search
+
+<h1><h1>Loading your results...</h1></h1>
+<p>This could take a few seconds, or up to a minute depending on Internet speed. Searching Fangraphs data for the time period @SearchInfo.StartYear to @SearchInfo.EndYear (@SearchInfo.LeagueOrTeam).</p>
+@using (Html.BeginForm("Loading", "Home", "Post"))
+    {
+        <br>
+        <input class="form-control" type="hidden" name="ID" value=@Model.ID />
+        <input class="form-control" type="hidden" name="StartYear" value=@Model.StartYear />
+        <input class="form-control" type="hidden" name="EndYear" value=@Model.EndYear />
+        <input class="form-control" type="hidden" name="LeagueOrTeam" value=@Model.LeagueOrTeam />
+        <input id="submitYears" type="submit" value="Search This Time Period" class="btn btn-primary" style="visibility:hidden" />
+    }
+<br>
+
+  <script type="text/javascript">
+      document.getElementById("submitYears").click() // automatically clicks submit button (this is a loading page while the search is made)
+  </script>
+

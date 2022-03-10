@@ -2,7 +2,7 @@
 
 namespace HistoricalMLBAllStars.Models
 {
-    public class PlayerContext : DbContext
+    public class PlayerContext : DbContext // Entity Framework context for accessing player database
     {
         public PlayerContext()
         {

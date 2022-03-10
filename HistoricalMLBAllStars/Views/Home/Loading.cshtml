@@ -24,12 +24,12 @@
 @if (SearchInfo.InDatabase == false)
 {
   <script type="text/javascript">
-      document.getElementById("submitYears").click()
+      document.getElementById("submitYears").click() @*automatically clicks submit button (this is a loading page while the FanGraphs search is made)*@
   </script>
 }
 @if (SearchInfo.InDatabase == true)
 {
   <script type="text/javascript">
-      document.getElementById("submitYearsQuick").click()
+      document.getElementById("submitYearsQuick").click() @*automatically clicks submit button (this is a loading page while the database search is made)*@
   </script>
 }

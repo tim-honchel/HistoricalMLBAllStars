@@ -29,9 +29,10 @@ namespace HistoricalMLBAllStars
         public void ConfigureServices(IServiceCollection services)
         {
 
-            string ConnectionString = Configuration.GetConnectionString("azure");
-            services.AddDbContext<PlayerContext>(options => options.UseSqlServer(ConnectionString));
-            services.AddDbContext<SearchContext>(options => options.UseSqlServer(ConnectionString));
+            string PlayerConnectionString = Configuration.GetConnectionString("azure");
+            string SearchConnectionString = Configuration.GetConnectionString("search");
+            services.AddDbContext<PlayerContext>(options => options.UseSqlServer(PlayerConnectionString));
+            services.AddDbContext<SearchContext>(options => options.UseSqlServer(SearchConnectionString));
             services.AddControllersWithViews();
         }
 

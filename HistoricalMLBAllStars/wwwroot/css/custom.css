@@ -4,7 +4,7 @@
     text-align: center;
     padding-right: 2%;
     padding-bottom: 10%;
-    overflow: auto;
+    overflow: auto; /*prevents text from showing over footer*/
 }
 
 .column-2 {
@@ -26,7 +26,7 @@
     left: 0;
 }
 
-.carousel-container {
+.carousel-container { /*image slider*/
     width: 430px;
     height: 410px;
     position: relative;
@@ -76,7 +76,7 @@
 }
 
 .table tr {
-    line-height:0pt;
+    line-height:0pt; /*keeps rows tight*/
 }
 
 .table th {
@@ -84,7 +84,7 @@
 }
 
 .table td {
-    text-align:right;
+    text-align:right; /*displays stats right-aligned, easier for tracking number of digits*/
 }
 
 #position {
@@ -93,6 +93,6 @@
 }
 
 #player {
-    white-space:nowrap;
+    white-space:nowrap; /*prevents player names from being bunched when window is narrowed*/
     text-align:left;
 }
