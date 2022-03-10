@@ -28,6 +28,7 @@ namespace HistoricalMLBAllStars.Controllers
         public IActionResult Index()
         {
             SearchInfo.Message = "";
+            SearchInfo.stopwatch.Reset();
             SearchInfo.InDatabase = false;
             var newSearch = new Search();
             SearchInfo.YearDropdown = new List<int> { };
