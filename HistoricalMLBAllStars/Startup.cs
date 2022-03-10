@@ -6,13 +6,18 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using HistoricalMLBAllStars.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HistoricalMLBAllStars
 {
     public class Startup
     {
+        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -23,6 +28,10 @@ namespace HistoricalMLBAllStars
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            string ConnectionString = Configuration.GetConnectionString("azure");
+            services.AddDbContext<PlayerContext>(options => options.UseSqlServer(ConnectionString));
+            services.AddDbContext<SearchContext>(options => options.UseSqlServer(ConnectionString));
             services.AddControllersWithViews();
         }
 

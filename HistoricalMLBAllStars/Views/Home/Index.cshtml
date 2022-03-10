@@ -6,9 +6,10 @@
         @using (Html.BeginForm("Loading", "Home", "Post"))
         {
             <br>
+            <input class="form-control" type="hidden" name="ID" value="not set" />
             <label asp-for="StartYear" class="control-label">Enter the starting year of the time period</label>
             <select id="startYear" class="form-control" name="StartYear" value="" onchange="ValidateYears()">
-                @foreach (int year in Model.YearDropdown)
+                @foreach (int year in SearchInfo.YearDropdown)
                 {
                     <option value="@year">@year</option>
                 }
@@ -16,7 +17,7 @@
             <br>
             <label asp-for="EndYear" class="control-label">Enter the ending year of the time period</label>
             <select id="endYear" class="form-control" name="EndYear" value="" onchange="ValidateYears()">
-                @foreach (int year in Model.YearDropdown)
+                @foreach (int year in SearchInfo.YearDropdown)
                 {
                     @if (year == 2021)
                     {
@@ -31,7 +32,7 @@
             <br>
             <label asp-for="LeagueOrTeam" class="control-label">Choose the league or team</label>
             <select class="form-control" name="LeagueOrTeam" value="">
-                @foreach (string team in Model.TeamDropdown)
+                @foreach (string team in SearchInfo.TeamDropdown)
                 {
                     <option value="@team">@team</option>
                 }

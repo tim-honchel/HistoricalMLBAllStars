@@ -5,12 +5,31 @@
 @using (Html.BeginForm("Roster", "Home", "Post"))
     {
         <br>
+        <input class="form-control" type="hidden" name="ID" value=@Model.ID />
         <input class="form-control" type="hidden" name="StartYear" value=@Model.StartYear />
         <input class="form-control" type="hidden" name="EndYear" value=@Model.EndYear />
         <input class="form-control" type="hidden" name="LeagueOrTeam" value=@Model.LeagueOrTeam />
         <input id="submitYears" type="submit" value="Search This Time Period" class="btn btn-primary" style="visibility:hidden" />
     }
+@using (Html.BeginForm("QuickRoster", "Home", "Post"))
+    {
+        <br>
+        <input class="form-control" type="hidden" name="ID" value=@Model.ID />
+        <input class="form-control" type="hidden" name="StartYear" value=@Model.StartYear />
+        <input class="form-control" type="hidden" name="EndYear" value=@Model.EndYear />
+        <input class="form-control" type="hidden" name="LeagueOrTeam" value=@Model.LeagueOrTeam />
+        <input id="submitYearsQuick" type="submit" value="Search This Time Period" class="btn btn-primary" style="visibility:hidden" />
+    }
 <br>
+@if (SearchInfo.InDatabase == false)
+{
   <script type="text/javascript">
-    document.getElementById("submitYears").click()
+      document.getElementById("submitYears").click()
   </script>
+}
+@if (SearchInfo.InDatabase == true)
+{
+  <script type="text/javascript">
+      document.getElementById("submitYearsQuick").click()
+  </script>
+}

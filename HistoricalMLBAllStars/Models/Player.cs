@@ -1,7 +1,11 @@
-﻿namespace HistoricalMLBAllStars.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace HistoricalMLBAllStars.Models
 {
     public class Player
     {
+        [Key]
+        public int PlayerID { get; set; }
         public string Position { get; set; }
         public int PosNum { get; set; } // numerical representation of the position
         public string Name { get; set; }
@@ -28,7 +32,7 @@
         public int RankPosition { get; set; }
         public string SearchID { get; set; }
         public string Role { get; set; } // rotation, bullpen, honorable mentions
-        public bool Duplicate { get; set; }
+        public string Duplicate { get; set; }
         
     }
 }

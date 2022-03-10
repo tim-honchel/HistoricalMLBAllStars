@@ -8,28 +8,34 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Net.Http;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Configuration;
 
 namespace HistoricalMLBAllStars.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly PlayerContext _playerContext;
+        private readonly SearchContext _searchContext;
         private readonly ILogger<HomeController> _logger;
         HttpClient client = new HttpClient();
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(PlayerContext playerContext, SearchContext searchContext)
         {
-            _logger = logger;
+            _playerContext = playerContext;
+            _searchContext = searchContext;
         }
 
         public IActionResult Index()
         {
+            SearchInfo.Message = "";
+            SearchInfo.InDatabase = false;
             var newSearch = new Search();
-            newSearch.YearDropdown = new List<int> { };
+            SearchInfo.YearDropdown = new List<int> { };
             for (int year = 1900; year <= 2021; year++)
             {
-                newSearch.YearDropdown.Add(year);
+                SearchInfo.YearDropdown.Add(year);
             }
-            newSearch.TeamDropdown = new List<string> { "All Teams", "American League", "National League", "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox", "Chicago Cubs", "Chicago White Sox", "Cincinnati Reds", "Cleveland Guardians", "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals", "Los Angeles Angels", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers", "Minnesota Twins", "New York Mets", "New York Yankees", "Oakland Athletics", "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants", "Seattle Mariners", "St.Louis Cardinals", "Tampa Bay Rays", "Texas Rangers", "Toronto Blue Jays", "Washington Nationals" };
+            SearchInfo.TeamDropdown = new List<string> { "All Teams", "American League", "National League", "Arizona Diamondbacks", "Atlanta Braves", "Baltimore Orioles", "Boston Red Sox", "Chicago Cubs", "Chicago White Sox", "Cincinnati Reds", "Cleveland Guardians", "Colorado Rockies", "Detroit Tigers", "Houston Astros", "Kansas City Royals", "Los Angeles Angels", "Los Angeles Dodgers", "Miami Marlins", "Milwaukee Brewers", "Minnesota Twins", "New York Mets", "New York Yankees", "Oakland Athletics", "Philadelphia Phillies", "Pittsburgh Pirates", "San Diego Padres", "San Francisco Giants", "Seattle Mariners", "St.Louis Cardinals", "Tampa Bay Rays", "Texas Rangers", "Toronto Blue Jays", "Washington Nationals" };
             return View(newSearch);
             
         }
@@ -41,21 +47,89 @@ namespace HistoricalMLBAllStars.Controllers
 
         public IActionResult Loading(Search newSearch)
         {
+            SearchInfo.stopwatch.Start();
             SetSearchInfo(newSearch); // sets global variables with search information
+            newSearch.ID = $"{newSearch.StartYear}{newSearch.EndYear}{newSearch.LeagueOrTeam}".Replace(" ","");
+            SearchInfo.SearchID = newSearch.ID;
+            SearchInfo.Message = $"{SearchInfo.Message} Searched database index.";
+            try
+            {
+                SearchInfo.InDatabase = _searchContext.searches.Any(m => m.ID == SearchInfo.SearchID);
+                if (SearchInfo.InDatabase == true)
+                {
+                    SearchInfo.Message = $"{SearchInfo.Message} Index found.";
+                }
+                else
+                {
+                    SearchInfo.Message = $"{SearchInfo.Message} Index not found.";
+                }
+            }
+            catch (Exception)
+            {
+                SearchInfo.Message = "Database index search failed.";
+            }
+
             return View(newSearch);
         }
-        public IActionResult Roster(Search newSearch)
+        public IActionResult Roster()
         {
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-            var htmlDictionary = RequestPages(newSearch); // asynchronously get HTML from 11 FanGraphs pages 
-            List<Player> players = PrepPlayers(htmlDictionary);
+            SearchInfo.Message = $"{SearchInfo.Message} Searched FanGraphs.";
+            List<Player> players = new List<Player>();
+            try
+            {
+                var htmlDictionary = RequestPages(); // asynchronously get HTML from 11 FanGraphs pages
+                players = PrepPlayers(htmlDictionary);
+                SearchInfo.Message = $"{SearchInfo.Message} FanGraphs connection succeeded.";
+            }
+            catch (Exception)
+            {
+                SearchInfo.Message = $"{SearchInfo.Message} FanGraphs connection failed.";
+                return RedirectToAction("Error");
+            }
             CheckDuplicates(players);
             ChooseRoster(players);
-            stopwatch.Stop();
-            SearchInfo.Time = stopwatch.Elapsed.Seconds;
+            Search newSearch = new Search() 
+            { 
+                ID = SearchInfo.SearchID,
+                StartYear = SearchInfo.StartYear,
+                EndYear = SearchInfo.EndYear,
+                LeagueOrTeam = SearchInfo.LeagueOrTeam
+            };
+            try
+            {
+                _searchContext.Add(newSearch);
+                _playerContext.AddRange(players);
+                _searchContext.SaveChanges();
+                _playerContext.SaveChanges();
+                SearchInfo.Message = $"{SearchInfo.Message} Database save succeeded.";
+            }
+            catch (Exception)
+            {
+                SearchInfo.Message = $"{SearchInfo.Message} Database save failed.";
+            }
+            SearchInfo.stopwatch.Stop();
+            SearchInfo.Time = SearchInfo.stopwatch.Elapsed.Seconds;
             return View(players.OrderBy(x => x.PosNum).ThenByDescending(x => x.War).ToList());
         }
+        public IActionResult QuickRoster()
+        {
+            SearchInfo.Message = $"{SearchInfo.Message} Searched player database.";
+            List<Player> players = new List<Player>();
+            try
+            {
+                players = _playerContext.players.Where(m => m.SearchID == SearchInfo.SearchID).ToList();
+                SearchInfo.Message = $"{SearchInfo.Message} Database search succeeded.";
+            }
+            catch
+            {
+                SearchInfo.Message = $"{SearchInfo.Message} Database search failed.";
+                return RedirectToAction("Roster");
+            }
+            SearchInfo.stopwatch.Stop();
+            SearchInfo.Time = SearchInfo.stopwatch.Elapsed.Seconds;
+            return View(players.OrderBy(x => x.PosNum).ThenByDescending(x => x.War).ToList());
+        }
+
             [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
@@ -94,10 +168,10 @@ namespace HistoricalMLBAllStars.Controllers
             }
         }
         
-        public Dictionary<string,string> RequestPages(Search newSearch)
+        public Dictionary<string,string> RequestPages()
         {
-            var minIP = Math.Min(10 * (newSearch.EndYear - newSearch.StartYear + 1), 100);
-            var minPA = Math.Min(20 * (newSearch.EndYear - newSearch.StartYear + 1), 200);
+            var minIP = Math.Min(10 * (SearchInfo.EndYear - SearchInfo.StartYear + 1), 100);
+            var minPA = Math.Min(20 * (SearchInfo.EndYear - SearchInfo.StartYear + 1), 200);
 
             var urlSP = $"https://www.fangraphs.com/leaders.aspx?pos=all&stats=pit&lg={SearchInfo.League}&qual={minIP}&type=c,59,6,42,4,11,24,13,7,8&season={SearchInfo.EndYear}&month=0&season1={SearchInfo.StartYear}&ind=0&team={SearchInfo.Team}&rost=0&age=0&filter=&players=0&startdate={SearchInfo.StartYear}-01-01&enddate={SearchInfo.EndYear}-12-31&page=1_10&sort={3-SearchInfo.StatAdjustment},d";
             var urlRP = $"https://www.fangraphs.com/leaders.aspx?pos=all&stats=pit&lg={SearchInfo.League}&qual=0&type=c,59,6,42,4,11,24,13,7,8&season={SearchInfo.EndYear}&month=0&season1={SearchInfo.StartYear}&ind=0&team={SearchInfo.Team}&rost=0&age=0&filter=&players=0&startdate={SearchInfo.StartYear}-01-01&enddate={SearchInfo.EndYear}-12-31&page=1_{40-20*SearchInfo.StatAdjustment}&sort={10-SearchInfo.StatAdjustment},d";
@@ -280,6 +354,7 @@ namespace HistoricalMLBAllStars.Controllers
                         pitcher.PosNum = 1;
                     }
                     pitcher.Role = "mention pitcher";
+                    pitcher.SearchID = SearchInfo.SearchID;
                     pitchers.Add(pitcher);
                 }
             }
@@ -369,6 +444,7 @@ namespace HistoricalMLBAllStars.Controllers
                     batter.Position = position;
                     batter.PosNum = positions[position];
                     batter.Role = "mention batter";
+                    batter.SearchID = SearchInfo.SearchID;
                     batters.Add(batter);
                 }
             }
@@ -382,13 +458,13 @@ namespace HistoricalMLBAllStars.Controllers
             {
                 foreach (Player player2 in players)
                 {
-                    if (player1.Name == player2.Name && player1 != player2 && player1.Duplicate != true && player2.Duplicate != true)
+                    if (player1.Name == player2.Name && player1 != player2 && player1.Duplicate != "true" && player2.Duplicate != "true")
                     {
                         ChooseDuplicateToRemove(player1, player2, players);
                     }
                 }
             }
-            List<Player> playersToRemove = players.FindAll(x => x.Duplicate == true);
+            List<Player> playersToRemove = players.FindAll(x => x.Duplicate == "true");
             foreach (Player player in playersToRemove)
             {
                     players.Remove(player);
@@ -399,7 +475,7 @@ namespace HistoricalMLBAllStars.Controllers
             if (player2.RankPosition == 1 && player1.RankPosition > 1 && player1.PosNum >= 2 && player2.PosNum != 10)
             {
                 player2.Position = $"{player2.Position}/{player1.Position}";
-                player1.Duplicate = true;
+                player1.Duplicate = "true";
             }
             else if (player2.RankPosition == 1 && player1.RankPosition == 1 && player2.PosNum >= 2 && player2.PosNum != 10)
             {
@@ -408,37 +484,37 @@ namespace HistoricalMLBAllStars.Controllers
                 if (nextBestPosition1 > nextBestPosition2)
                 {
                     player2.Position = $"{player2.Position}/{player1.Position}";
-                    player1.Duplicate = true;
+                    player1.Duplicate = "true";
                 }
                 else
                 {
                     player1.Position = $"{player1.Position}/{player2.Position}";
-                    player2.Duplicate = true;
+                    player2.Duplicate = "true";
                 }
             }
             else if (player2.PosNum == 2 && player2.RankPosition == 2 && player1.RankPosition != 1)
             {
                 player2.Position = $"{player2.Position}/{player1.Position}";
-                player1.Duplicate = true;
+                player1.Duplicate = "true";
             }
             else if (player1.PosNum == 10)
             {
                 player2.Position = $"{player2.Position}/{player1.Position}";
-                player1.Duplicate = true;
+                player1.Duplicate = "true";
             }
             else if (player1.PosNum == 3 && player2.PosNum != 10)
             {
                 player2.Position = $"{player2.Position}/{player1.Position}";
-                player1.Duplicate = true;
+                player1.Duplicate = "true";
             }
             else if (player2.PosNum + player1.PosNum <= 2)
             {
-                player2.Duplicate = true;
+                player2.Duplicate = "true";
             }
             else
             {
                 player1.Position = $"{player1.Position}/{player2.Position}";
-                player2.Duplicate = true;
+                player2.Duplicate = "true";
             }
         }
         public void ChooseRoster(List<Player> players)
@@ -536,6 +612,7 @@ namespace HistoricalMLBAllStars.Controllers
                     {
                         player.Role = "bullpen";
                         positionCount[player.PosNum]++;
+                        player.PosNum = 1;
                         rosterCount["bullpen"]++;
                     }
                 }
@@ -544,11 +621,11 @@ namespace HistoricalMLBAllStars.Controllers
                     rosterCount[player.Role]++;
                     if (rosterCount[player.Role] > 5)
                     {
-                        player.Duplicate = true;
+                        player.Duplicate = "true";
                     }
                 }
             }
-            List<Player> playersToRemove = players.FindAll(x => x.Duplicate == true);
+            List<Player> playersToRemove = players.FindAll(x => x.Duplicate == "true");
             foreach (Player player in playersToRemove)
             {
                 players.Remove(player);
